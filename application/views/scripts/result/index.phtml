@@ -71,7 +71,7 @@
             </div>
     </div>
     <div class="row">
-        <div class="col-md-4 col-sm-3 pre-scrollable">
+        <div class="col-md-4 col-sm-3 pre-scrollable house-res">
             <ul class="list-group">
                 <!--                this parameter is temporary set like this when using filter should be removed-->
                 <?php $params['filters']['city'] = $this->search; ?>
@@ -85,12 +85,20 @@
 
                 </script>
                 <?php foreach ($collection as $house): ?>
-                    <li class="list-group-item">
-                        <?php echo sprintf('Adres: %s', $house->Adres) . "<br>"; ?>
+                    <script>
+                        newLat = <?php echo json_encode($house->WGS84_Y); ?>;
+                        newLng = <?php echo json_encode($house->WGS84_X); ?>;
+                    </script>
+                    <li onmouseout="mouseOut(this, newLat, newLng)" onmouseover="mouseOver(this, newLat, newLng)" class="list-group-item">
+                        <script>
+                            console.log(newLat, newLng);
+                        </script>
+                        <?php echo sprintf('Adres: %s',  $house->Adres) . "<br>"; ?>
                         <?php echo sprintf('Aantal kamers: %s', $house->AantalKamers) . "<br>"; ?>
                         <?php echo sprintf('Koop prijs: %s,- euro', $house->Koopprijs) . "<br>"; ?>
                     </li>
                 <?php endforeach; ?>
+
 
                 <div class="row">
                     <div class="col-md-6">
@@ -110,6 +118,7 @@
             </ul>
         </div>
         <script>
+
             var map;
             var infoWindow = new google.maps.InfoWindow();
 
@@ -147,22 +156,50 @@
 
                     addInfoWindow(houseMarker, details);
 
+                    }
+
                 }
-            }
 
             google.maps.event.addDomListener(window, 'load', initialize);
+
             function addInfoWindow(houseMarker, details) {
+
                 google.maps.event.addListener(houseMarker, 'click', function () {
+
                     if (!houseMarker.open) {
                         infoWindow.setContent(details);
                         infoWindow.open(map, houseMarker);
                         houseMarker.open = true;
+
                     }
                     else {
                         infoWindow.close(map, houseMarker);
                         houseMarker.open = false;
+
                     }
+
                 });
+            }
+
+            function mouseOver(x, newLat, newLng) {
+                var pos = new google.maps.LatLng(newLat, newLng);
+
+                var Serr = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    icon: 'images/house.png'
+                });
+                //console.log(pos);
+                Serr.setIcon('images/house.png');
+                x.style.fontWeight = 'bold';
+                //infoWindow.setContent(y);
+                //infoWindow.open(map, houseMarker);
+            }
+
+            function mouseOut(x) {
+                Serr.setMap(null);
+                x.style.fontWeight = 'normal';
+                //infoWindow.close();
             }
         </script>
         <div id="map-canvas" class="span12 col-md-8 col-sm-9"/>
