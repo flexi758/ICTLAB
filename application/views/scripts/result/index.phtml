@@ -62,17 +62,7 @@
             </form>
         </div>
     </div>
-    <div class="row">
-            <div class="col-md-4">
-                <h3>Beschikbare huizen</h3>
-            </div>
-            <div class="col-md-8">
-                <h3>Map</h3>
-            </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 col-sm-3 pre-scrollable house-res">
-            <ul class="list-group">
+
                 <!--                this parameter is temporary set like this when using filter should be removed-->
                 <?php $params['filters']['city'] = $this->search; ?>
 
@@ -84,43 +74,14 @@
                     var lng = <?php echo json_encode($this->lng); ?>;
 
                 </script>
-                <?php foreach ($collection as $house): ?>
-                    <script>
-                        newLat = <?php echo json_encode($house->WGS84_Y); ?>;
-                        newLng = <?php echo json_encode($house->WGS84_X); ?>;
-                    </script>
-                    <li onmouseout="mouseOut(this, newLat, newLng)" onmouseover="mouseOver(this, newLat, newLng)" class="list-group-item">
-                        <script>
-                            console.log(newLat, newLng);
-                        </script>
-                        <?php echo sprintf('Adres: %s',  $house->Adres) . "<br>"; ?>
-                        <?php echo sprintf('Aantal kamers: %s', $house->AantalKamers) . "<br>"; ?>
-                        <?php echo sprintf('Koop prijs: %s,- euro', $house->Koopprijs) . "<br>"; ?>
-                    </li>
-                <?php endforeach; ?>
 
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <!--                        show vorige als page groter dan 1-->
-                        <?php if ($this->fundaAanbod->page > 1) { ?>
-                            <a href="<?php echo $this->baseUrl . '&page=' . $this->fundaAanbod->page - 1; ?>"
-                               class="btn btn-default" role="button">Vorige</a>
-                        <?php
-                        }
-                        ?>
-                    </div>
-                    <div class="col-md-6" align="right">
-                        <a href="<?php echo $this->baseUrl . '&page=' . $this->fundaAanbod->page + 1; ?>"
-                           class="btn btn-default" role="button">Volgende</a>
-                    </div>
-                </div>
-            </ul>
-        </div>
         <script>
 
             var map;
             var infoWindow = new google.maps.InfoWindow();
+            var gmarkers = [];
+            var marker_num = gmarkers.length-1;
 
             function initialize() {
                 var mapOptions = {
@@ -142,10 +103,12 @@
                     houseRooms = 'Aantal kamers: ' + collection[i]['AantalKamers'];
                     myLatLng = new google.maps.LatLng(collection[i]['WGS84_Y'], collection[i]['WGS84_X']);
                     houseMarker = new google.maps.Marker({
-                        position: myLatLng,
-                        map: map,
-                        icon: 'images/house-marker.png'
+                            position: myLatLng,
+                            map: map,
+                            icon: 'images/house-marker.png'
                     });
+
+                    gmarkers.push(houseMarker);
 
                     var details = '<h5>' + houseAdress + '</h5>' +
                         '<p>' + housePrice + '<br />' +
@@ -180,28 +143,54 @@
 
                 });
             }
+</script>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Beschikbare huizen</h3>
+    </div>
+    <div class="col-md-8">
+        <h3>Map</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 col-sm-3 pre-scrollable house-res">
+        <ul class="list-group">
+            <?php foreach ($collection as $house): ?>
+                <li onmouseover="gmarkers['+marker_num+'].setIcon('images/house_green.png')" class="list-group-item">
+                    <?php echo sprintf('Adres: %s',  $house->Adres) . "<br>"; ?>
+                    <?php echo sprintf('Aantal kamers: %s', $house->AantalKamers) . "<br>"; ?>
+                    <?php echo sprintf('Koop prijs: %s,- euro', $house->Koopprijs) . "<br>"; ?>
+                </li>
+            <?php endforeach; ?>
 
-            function mouseOver(x, newLat, newLng) {
-                var pos = new google.maps.LatLng(newLat, newLng);
+            <div class="row">
+                <div class="col-md-6">
+                    <!--                        show vorige als page groter dan 1-->
+                    <?php if ($this->fundaAanbod->page > 1) { ?>
+                        <a href="<?php echo $this->baseUrl . '&page=' . $this->fundaAanbod->page - 1; ?>"
+                           class="btn btn-default" role="button">Vorige</a>
+                    <?php
+                    }
+                    ?>
+                </div>
+                <div class="col-md-6" align="right">
+                    <a href="<?php echo $this->baseUrl . '&page=' . $this->fundaAanbod->page + 1; ?>"
+                       class="btn btn-default" role="button">Volgende</a>
+                </div>
+            </div>
+        </ul>
+    </div>
+<!--<script>-->
+<!--    function mouseOver(x) {-->
+<!--        x.style.fontWeight = 'bold';-->
+<!--    }-->
+<!---->
+<!--    function mouseOut(x) {-->
+<!--        x.style.fontWeight = 'normal';-->
+<!---->
+<!--    }-->
+<!--        </script>-->
 
-                var Serr = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    icon: 'images/house.png'
-                });
-                //console.log(pos);
-                Serr.setIcon('images/house.png');
-                x.style.fontWeight = 'bold';
-                //infoWindow.setContent(y);
-                //infoWindow.open(map, houseMarker);
-            }
-
-            function mouseOut(x) {
-                Serr.setMap(null);
-                x.style.fontWeight = 'normal';
-                //infoWindow.close();
-            }
-        </script>
         <div id="map-canvas" class="span12 col-md-8 col-sm-9"/>
     </div>
 </div>
